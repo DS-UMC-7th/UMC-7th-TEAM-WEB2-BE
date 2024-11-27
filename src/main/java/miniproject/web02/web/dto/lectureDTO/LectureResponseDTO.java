@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 public class LectureResponseDTO {
     @Builder
     @Getter
@@ -16,5 +18,7 @@ public class LectureResponseDTO {
         String platform;
         String teacher;
         String imageUrl;
+        String category;
+        BigDecimal totalRating;
     }
 }

@@ -78,6 +78,8 @@ public class LectureServiceImpl implements LectureService {
                 .lectureName(savedLecture.getName())
                 .platform(savedLecture.getPlatform().toString())
                 .teacher(savedLecture.getTeacher())
+                .category(savedLecture.getCategory().toString())
+                .totalRating(savedLecture.getTotalRating())
                 .imageUrl(imageUrl)  // 이미지 URL 반환
                 .build();
     }

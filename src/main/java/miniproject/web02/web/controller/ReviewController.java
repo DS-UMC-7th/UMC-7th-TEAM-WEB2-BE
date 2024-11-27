@@ -1,12 +1,15 @@
 package miniproject.web02.web.controller;
 
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import miniproject.web02.apiPayLoad.code.status.ErrorStatus;
 import miniproject.web02.apiPayLoad.code.status.SuccessStatus;
 import miniproject.web02.domain.enums.Category;
 import miniproject.web02.domain.enums.Level;
 import miniproject.web02.domain.enums.StudyTime;
+import miniproject.web02.service.LikeService;
 import miniproject.web02.service.ReviewFilterService;
 import miniproject.web02.service.reviewService.ReviewService;
 import miniproject.web02.web.dto.ApiResponse;
@@ -28,6 +31,7 @@ public class ReviewController {
 
     private final ReviewFilterService reviewFilterService;
     private final ReviewService reviewService;
+    private final LikeService likeService;
 
     private static final Logger logger= LoggerFactory.getLogger(ReviewController.class);
 
@@ -95,5 +99,20 @@ public class ReviewController {
                             .result(null)
                             .build());
         }
+    }
+
+    @PatchMapping("/{reviewId}/like")
+    @Operation(summary = "리뷰 좋아요 API", description = "리뷰에 좋아요를 추가합니다.")
+    public ResponseEntity<ApiResponse<ReviewResponseDTO.ReviewDTO>> likeReview(@PathVariable Long reviewId) {
+        // 좋아요 수 증가 처리
+        ReviewResponseDTO.ReviewDTO updatedReview = likeService.likeReview(reviewId);
+
+        // 성공 응답 반환
+        return ResponseEntity.ok(ApiResponse.<ReviewResponseDTO.ReviewDTO>builder()
+                .isSuccess(true)
+                .code(SuccessStatus.SUCCESS_LIKE_REVIEW.getCode())
+                .message(SuccessStatus.SUCCESS_LIKE_REVIEW.getMessage())
+                .result(updatedReview)
+                .build());
     }
 }

@@ -13,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -44,4 +45,5 @@ public class Lecture extends BaseEntity {
 
     @OneToMany(mappedBy = "lecture", cascade = CascadeType.ALL)
     private List<Review> reviewList = new ArrayList<>();
+
 }

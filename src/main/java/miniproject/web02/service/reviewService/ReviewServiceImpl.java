@@ -19,6 +19,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -136,6 +138,9 @@ public class ReviewServiceImpl implements ReviewService {
             reviewRepository.save(savedReview); // Review와 연관된 리뷰 이미지 저장
         }
 
+        // 총 별점 업데이트
+        updateLectureRating(lecture);
+
         return ReviewResponseDTO.ReviewDTO.builder()
                 .reviewId(savedReview.getReviewId())
                 .rating(savedReview.getRating())
@@ -146,4 +151,40 @@ public class ReviewServiceImpl implements ReviewService {
                 .createdAt(savedReview.getCreatedAt())
                 .build();
     }
+
+    @Override
+    public void deleteReview(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new TempHandler(ErrorStatus.REVIEW_NOT_FOUND));
+
+        Lecture lecture = review.getLecture();
+        reviewRepository.delete(review);
+
+        updateLectureRating(lecture);
+    }
+
+    private void updateLectureRating(Lecture lecture) {
+        // 리뷰 목록 가져오기
+        List<Review> reviews = reviewRepository.findAllByLecture(lecture);
+
+        // 리뷰가 없을 경우, 평균 별점 0으로 설정
+        if (reviews.isEmpty()) {
+            lecture.setTotalRating(BigDecimal.ZERO);
+            lectureRepository.save(lecture);
+            return;
+        }
+
+        // 모든 리뷰의 별점을 합산하여 평균을 계산
+        BigDecimal averageRating = reviews.stream()
+                .map(Review::getRating)  // Review에서 rating을 가져옴
+                .reduce(BigDecimal.ZERO, BigDecimal::add)  // 별점 합산
+                .divide(BigDecimal.valueOf(reviews.size()), 2, RoundingMode.HALF_UP);  // 평균 계산
+
+        // Lecture의 totalRating 업데이트
+        lecture.setTotalRating(averageRating);
+        lectureRepository.save(lecture);
+    }
+
+
+
 }
